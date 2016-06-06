@@ -30,3 +30,12 @@
 
 # Debug files
 *.dSYM/
+
+# Output directories
+[Dd]ebug*/
+[Rr]elease*/
+
+# Temporary files
+*~
+*.swp
+*.bak
