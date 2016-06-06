@@ -27,31 +27,37 @@ int WINAPI AppMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   wc.cbClsExtra    = 0;
   wc.cbWndExtra    = 0;
   wc.hInstance     = hInstance;
-  wc.hIcon         = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 0, 0,
-                                       LR_DEFAULTSIZE | LR_DEFAULTCOLOR | LR_SHARED);
-  wc.hCursor       = (HCURSOR) LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, LR_SHARED);
+  wc.hIcon         = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON),
+									   IMAGE_ICON, 0, 0, 
+									   LR_DEFAULTSIZE | LR_DEFAULTCOLOR | 
+									   LR_SHARED);
+  wc.hCursor       = (HCURSOR) LoadImage(NULL, IDC_ARROW, IMAGE_CURSOR, 0, 0, 
+										 LR_SHARED);
   wc.hbrBackground = (HBRUSH) (COLOR_BTNFACE + 1);
   wc.lpszMenuName  = MAKEINTRESOURCE(IDR_MAINMENU);
   wc.lpszClassName = MainWndClass;
-  wc.hIconSm       = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON,
-                                       GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON),
+  wc.hIconSm       = (HICON) LoadImage(hInstance, MAKEINTRESOURCE(IDI_APPICON),
+									   IMAGE_ICON, 
+									   GetSystemMetrics(SM_CXSMICON), 
+									   GetSystemMetrics(SM_CYSMICON),
                                        LR_DEFAULTCOLOR | LR_SHARED);
 
   // Register our window classes, or error.
-  if (! RegisterClassEx(&wc))
-  {
-    MessageBox(NULL, TEXT("Error registering window class."), TEXT("Error"), MB_ICONERROR | MB_OK);
+  if (! RegisterClassEx(&wc)) {
+    MessageBox(NULL, TEXT("Error registering window class."), 
+			   TEXT("Error"), MB_ICONERROR | MB_OK);
     return 0;
   }
   
   // Create instance of main window.
-  hWnd = CreateWindowEx(0, MainWndClass, MainWndClass, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+  hWnd = CreateWindowEx(0, MainWndClass, MainWndClass, 
+						WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
                         320, 200, NULL, NULL, hInstance, NULL);
 
   // Error if window creation failed.
-  if (! hWnd)
-  {
-    MessageBox(NULL, TEXT("Error creating main window."), TEXT("Error"), MB_ICONERROR | MB_OK);
+  if (! hWnd) {
+    MessageBox(NULL, TEXT("Error creating main window."), 
+			   TEXT("Error"), MB_ICONERROR | MB_OK);
     return 0;
   }
 
@@ -68,10 +74,8 @@ int WINAPI AppMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
   UpdateWindow(hWnd);
 
   // Main message loop.
-  while(GetMessage(&msg, NULL, 0, 0) > 0)
-  {
-    if (! TranslateAccelerator(msg.hwnd, hAccelerators, &msg))
-    {
+  while(GetMessage(&msg, NULL, 0, 0) > 0) {
+    if (! TranslateAccelerator(msg.hwnd, hAccelerators, &msg)) {
       TranslateMessage(&msg);
       DispatchMessage(&msg);
     }

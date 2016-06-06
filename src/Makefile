@@ -36,7 +36,7 @@ LDFLAGS = -s -Wl,--subsystem,windows
 
 LIBDIRS = win
 
-LIBS = pthread m win comctl32
+LIBS = pthread m win comctl32 gdi32
 OBJS = win/resource.o
 
 INCPATH = . include 
