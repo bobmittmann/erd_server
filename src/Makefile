@@ -27,9 +27,9 @@ CFILES = chat.c match.c trdp_proxy.c
 
 # Compile ANSI build only if CHARSET=ANSI
 ifeq (${CHARSET}, ANSI)
-  CFLAGS= -O3 -std=c99 -D _WIN32_IE=0x0500 -D WINVER=0x500
+  CFLAGS= -O3 -std=c99 -D _WIN32_IE=0x0500 -D WINVER=0x600
 else
-  CFLAGS= -O3 -std=c99 -D UNICODE -D _UNICODE -D _WIN32_IE=0x0500 -D WINVER=0x500
+  CFLAGS= -O3 -std=c99 -D UNICODE -D _UNICODE -D _WIN32_IE=0x0500 -D WINVER=0x600
 endif
 
 LDFLAGS = -s -Wl,--subsystem,windows

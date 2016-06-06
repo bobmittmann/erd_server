@@ -34,6 +34,22 @@ void cleanup(int sig)
 	fflush(stdout);
 }
 
+extern struct terminal * logterm;
+void term_puts(struct terminal * term, char * s);
+void msleep(unsigned int msec);
+
+void trdp_proxy_main(void * arg) 
+{
+	printf("trdp_proxy_main()\n");
+	fflush(stdout);
+
+	for(;;) {
+		msleep(500);
+		term_puts(logterm, "Hello\r\n");
+	}
+}
+
+
 #ifdef _WIN32
 
 BOOL CtrlHandler(DWORD fdwCtrlType) 

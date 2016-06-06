@@ -1,10 +1,49 @@
 
 #include "callbacks.h"
 #include "resource.h"
+#include <stdio.h>
 
 #define IDC_MAIN_EDIT	101
 
+struct terminal {
+  HWND hWnd;
+};
 
+
+struct terminal * WinTerminalInit(HWND hWnd)
+{
+	static struct terminal term;
+
+	term.hWnd = GetDlgItem(hWnd, IDC_MAIN_EDIT);
+
+	return &term;
+}
+
+void term_puts(struct terminal * term, const char * s)
+{
+	HWND hwnd = term->hWnd;
+	// get the current selection
+	DWORD StartPos, EndPos;
+	int outLength;
+	LPWSTR  lpwcs;
+	int n;
+
+	n = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)s, -1, NULL, 0);
+	lpwcs = (LPWSTR)LocalAlloc(0, n * sizeof(TCHAR));
+	MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)s, -1, lpwcs, n);
+
+	SendMessage(hwnd, EM_GETSEL, (WPARAM)&StartPos, (WPARAM)&EndPos);
+
+	// move the caret to the end of the text
+	outLength = GetWindowTextLength(hwnd);
+	SendMessage(hwnd, EM_SETSEL, outLength, outLength);
+
+	// insert the text at the new caret position
+	SendMessage(hwnd, EM_REPLACESEL, TRUE, (LPARAM)lpwcs);
+
+	// restore the previous selection
+	SendMessage(hwnd, EM_SETSEL, StartPos, EndPos);
+}
 
 static void SetEditCtrlFont(HWND hwnd)
 {
