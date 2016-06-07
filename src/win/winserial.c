@@ -358,10 +358,10 @@ const struct serial_op win_serial_op = {
 
 struct serial_dev * win_serial_open(const char * com_port)
 {
-	char line[128];
 	struct win_serial_drv * drv;
 	struct serial_dev * dev;
 	HANDLE hComm;
+	TCHAR pszFileName[128];
 
 
 	drv = (struct win_serial_drv *)malloc(sizeof(struct win_serial_drv));
@@ -380,10 +380,9 @@ struct serial_dev * win_serial_open(const char * com_port)
 	dev->drv = (void *)drv;
 	dev->op = &win_serial_op;
 
+	wsprintf(pszFileName, TEXT("\\\\.\\%s"), com_port);
 
-	sprintf(line, "\\\\.\\%s", com_port);
-
-	hComm = CreateFile(line,  
+	hComm = CreateFile(pszFileName,  
 					   GENERIC_READ | GENERIC_WRITE, 
 					   0, 
 					   0, 

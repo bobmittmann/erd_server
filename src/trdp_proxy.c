@@ -70,7 +70,7 @@ BOOL CtrlHandler(DWORD fdwCtrlType)
 
 #endif
 
-#define APP_NAME "yload"
+#define APP_NAME "trdp_proxy"
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
 
@@ -85,33 +85,24 @@ static void show_usage(void)
 	fprintf(stderr, "  -p PORT  Set comm PORT (default: 'COM1')\n");
 	fprintf(stderr, "  -q       Quiet\n");
 	fprintf(stderr, "\n");
+	fflush(stderr);
 }
 
 static void show_version(void)
 {
 	fprintf(stderr, "%s %d.%d\n", APP_NAME, VERSION_MAJOR, VERSION_MINOR);
+	fflush(stderr);
 }
 
 static void parse_err(char * opt)
 {
 	fprintf(stderr, "%s: invalid option %s\n", progname, opt);
+	fflush(stderr);
 }
 
-
-int WINAPI AppMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
-				   LPSTR lpCmdLine, int nCmdShow);
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
-				   LPSTR lpCmdLine, int nCmdShow)
+int parse_cmd_line(int argc, char *argv[]) 
 {
-	return AppMain(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
-}
-
-#if 0
-
-int main(int argc, char *argv[]) 
-{
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32)
 	const char * port = "COM1";
 #else
 	const char * port = "/dev/ttyS11";
@@ -161,6 +152,47 @@ int main(int argc, char *argv[])
 	printf("- Serial port: '%s'\n", port);
 	fflush(stdout);
 
+	return 0;
+}
+
+#if defined(_WIN32)
+int WINAPI AppMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
+				   LPSTR lpCmdLine, int nCmdShow);
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, 
+				   LPSTR lpCmdLine, int nCmdShow)
+{
+	LPWSTR *szArglist;
+	char ** argv;
+	int argc;
+	int i;
+
+	szArglist = CommandLineToArgvW(GetCommandLineW(), &argc);
+	if (NULL == szArglist ) {
+		return 0;
+	}
+	argv = LocalAlloc(0, argc * sizeof(char *));
+	for(i = 0; i < argc; i++) {
+		int len = WideCharToMultiByte(CP_UTF8, 0, szArglist[i], -1, 
+									  NULL, 0, NULL, NULL);
+		argv[i] = LocalAlloc(0, len + 1);
+		WideCharToMultiByte(CP_UTF8, 0, szArglist[i], -1,
+							argv[i], len, NULL, NULL);
+	}
+	// Free memory allocated for CommandLineToArgvW arguments.
+	LocalFree(szArglist);
+
+	parse_cmd_line(argc, argv); 
+
+	return AppMain(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+}
+
+#else
+
+int main(int argc, char *argv[]) 
+{
+	parse_cmd_line(argc, *argv[]); 
+
 #ifdef _WIN32
 	DBG(DBG_INFO, "win_serial_open() ...");
 	if ((ser = win_serial_open(port)) == NULL) {
@@ -184,3 +216,4 @@ int main(int argc, char *argv[])
 }
 
 #endif
+
