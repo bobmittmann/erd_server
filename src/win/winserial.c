@@ -380,7 +380,7 @@ struct serial_dev * win_serial_open(const char * com_port)
 	dev->drv = (void *)drv;
 	dev->op = &win_serial_op;
 
-	wsprintf(pszFileName, TEXT("\\\\.\\%s"), com_port);
+	MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)com_port, -1, pszFileName, 127);
 
 	hComm = CreateFile(pszFileName,  
 					   GENERIC_READ | GENERIC_WRITE, 
@@ -391,7 +391,7 @@ struct serial_dev * win_serial_open(const char * com_port)
 					   0);
 
 	if (hComm == INVALID_HANDLE_VALUE) {
-		DBG(DBG_WARNING, "CreateFile(\"%s\") failed!", line);
+		DBG(DBG_WARNING, "CreateFile(\"%s\") failed!", com_port);
 		free(drv);
 		free(dev);
 		return NULL;

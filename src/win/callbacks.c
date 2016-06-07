@@ -43,6 +43,31 @@ void term_puts(struct terminal * term, const char * s)
 
 	// restore the previous selection
 	SendMessage(hwnd, EM_SETSEL, StartPos, EndPos);
+
+	LocalFree(lpwcs);
+}
+
+int term_vprintf(struct terminal * term, const char * fmt, va_list ap)
+{
+	char s[1024];
+	int cnt;
+
+	cnt = vsnprintf(s, 1023, fmt, ap);
+	term_puts(term, s);
+
+	return cnt;
+}
+
+int term_printf(struct terminal * term, const char * fmt, ...)
+{
+	va_list ap;
+	int cnt;
+
+	va_start(ap, fmt);
+	cnt = term_vprintf(term, fmt, ap);
+	va_end(ap);
+
+	return cnt;
 }
 
 static void SetEditCtrlFont(HWND hwnd)

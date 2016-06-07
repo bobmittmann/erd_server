@@ -243,6 +243,13 @@ static inline int serial_dma_prepare(struct serial_dev * dev,
 						  (uintptr_t)buf, len);
 }
 
+#define SERIAL_PORT_PATH_MAX 64
+#define SERIAL_PORT_DESC_MAX 64
+
+struct port_entry {
+	char path[SERIAL_PORT_PATH_MAX]; 
+	char desc[SERIAL_PORT_DESC_MAX]; 
+};
 
 #ifdef __cplusplus
 extern "C" {
@@ -286,6 +293,8 @@ int serial_control_get(struct serial_dev * dev, struct serial_control * ctrl);
 
 int serial_status_set(struct serial_dev * dev, struct serial_status * stat);
 */
+
+int serial_port_list(struct port_entry lst[], int max);
 
 #ifdef __cplusplus
 }

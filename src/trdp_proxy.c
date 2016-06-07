@@ -27,6 +27,13 @@ struct serial_dev * win_serial_open(const char * com_port);
  */
 
 struct serial_dev * ser;
+static char * progname;
+#if defined(_WIN32)
+char * serial_port = "COM1";
+#else
+char * serial_port = "/dev/ttyS11";
+#endif
+int quiet = 0;
 
 void cleanup(int sig)
 {
@@ -36,46 +43,54 @@ void cleanup(int sig)
 
 extern struct terminal * logterm;
 void term_puts(struct terminal * term, char * s);
+int term_printf(struct terminal * term, const char * fmt, ...);
 void msleep(unsigned int msec);
 
 void trdp_proxy_main(void * arg) 
 {
+	char * port = serial_port;
+	struct port_entry lst[32];
+	int cnt;
+	int i;
+	
 	printf("trdp_proxy_main()\n");
 	fflush(stdout);
 
+	cnt = serial_port_list(lst, 32);
+	(void)cnt;
+	for (i = 0; i < cnt; ++i) {
+		term_printf(logterm, "\"%s\" \"%s\"\n", lst[i].path, lst[i].desc);
+		fflush(stdout);
+	}
+
+	i = 0;
 	for(;;) {
-		msleep(500);
-		term_puts(logterm, "Hello\r\n");
+		
+		if (i < cnt) {
+			port = lst[i].path;
+			i++;
+			if (i == cnt)
+				i = 0;
+		}
+
+		msleep(1000);
+
+		DBG(DBG_INFO, "win_serial_open() ...");
+		if ((ser = win_serial_open(port)) == NULL) {
+			term_printf(logterm, "#WARN: can't open serial port: \"%s\"\n", 
+						port);
+		} else {
+			DBG(DBG_INFO, "win_serial_open() ...");
+			serial_close(ser);
+		}
+
 	}
 }
 
 
-#ifdef _WIN32
-
-BOOL CtrlHandler(DWORD fdwCtrlType) 
-{ 
-	printf("CtrlHandler(%u)\n", (unsigned int)fdwCtrlType);
-	fflush(stdout);
-
-	switch (fdwCtrlType) { 
-	case CTRL_C_EVENT: // Handle the CTRL-C signal. 
-	case CTRL_BREAK_EVENT: 
-	case CTRL_CLOSE_EVENT: 
-		cleanup(1);
-		return TRUE; 
-	default: 
-		return FALSE; 
-	} 
-} 
-
-#endif
-
 #define APP_NAME "trdp_proxy"
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
-
-static char * progname;
-
 
 static void show_usage(void)
 {
@@ -102,12 +117,6 @@ static void parse_err(char * opt)
 
 int parse_cmd_line(int argc, char *argv[]) 
 {
-#if defined(_WIN32)
-	const char * port = "COM1";
-#else
-	const char * port = "/dev/ttyS11";
-#endif
-	int quiet = 0;
 	int c;
 
 	/* the program name start just after the last slash */
@@ -130,7 +139,7 @@ int parse_cmd_line(int argc, char *argv[])
 			show_usage();
 			return 1;
 		case 'p':
-			port = optarg;
+			serial_port = optarg;
 			break;
 		case 'q':
 			quiet++;
@@ -149,7 +158,7 @@ int parse_cmd_line(int argc, char *argv[])
 		return 3;
 	}
 
-	printf("- Serial port: '%s'\n", port);
+	printf("- Serial port: '%s'\n", serial_port);
 	fflush(stdout);
 
 	return 0;
@@ -193,24 +202,9 @@ int main(int argc, char *argv[])
 {
 	parse_cmd_line(argc, *argv[]); 
 
-#ifdef _WIN32
-	DBG(DBG_INFO, "win_serial_open() ...");
-	if ((ser = win_serial_open(port)) == NULL) {
-		fprintf(stderr, "%s: can't open serial port!\n", progname);
-		fflush(stderr);
-		return 5;
-	}
-
-	/* Register a cleanup callback routine */
-	if (SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandler, TRUE)) { 
-	} else {
-#ifdef __MINGW32__
-		signal(SIGINT, cleanup);
-		signal(SIGTERM, cleanup);
-		signal(SIGBREAK, cleanup);
-#endif
-	}
-#endif
+	signal(SIGINT, cleanup);
+	signal(SIGTERM, cleanup);
+	signal(SIGBREAK, cleanup);
 
 	return 0;
 }
