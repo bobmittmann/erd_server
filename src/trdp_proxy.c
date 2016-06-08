@@ -20,6 +20,7 @@ struct serial_dev * win_serial_open(const char * com_port);
 #endif
 
 #include "serial.h"
+#include "syscfg.h"
 
 /* -------------------------------------------------------------------------
  * Application startup
@@ -52,7 +53,9 @@ void trdp_proxy_main(void * arg)
 	struct port_entry lst[32];
 	int cnt;
 	int i;
-	
+
+	syscfg_start("trdp_proxy.cfg");
+
 	printf("trdp_proxy_main()\n");
 	fflush(stdout);
 
@@ -64,8 +67,22 @@ void trdp_proxy_main(void * arg)
 	}
 
 	i = 0;
+	port = syscfg.session.port;
 	for(;;) {
 		
+		DBG(DBG_INFO, "win_serial_open() ...");
+		if ((ser = win_serial_open(port)) == NULL) {
+			term_printf(logterm, "#WARN: can't open serial port: \"%s\"\n", 
+						port);
+		} else {
+			serial_close(ser);
+		}
+
+		if (trdp_probe(ser) = false) {
+			serial_close(ser);
+		}
+		};
+
 		if (i < cnt) {
 			port = lst[i].path;
 			i++;
@@ -74,15 +91,6 @@ void trdp_proxy_main(void * arg)
 		}
 
 		msleep(1000);
-
-		DBG(DBG_INFO, "win_serial_open() ...");
-		if ((ser = win_serial_open(port)) == NULL) {
-			term_printf(logterm, "#WARN: can't open serial port: \"%s\"\n", 
-						port);
-		} else {
-			DBG(DBG_INFO, "win_serial_open() ...");
-			serial_close(ser);
-		}
 
 	}
 }

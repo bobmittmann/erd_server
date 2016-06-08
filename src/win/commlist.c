@@ -253,34 +253,19 @@ int serial_port_list(struct port_entry lst[], int max)
 		int i;
 
 		for (i = 0; i < comports; i++) {
-
 			char * desc;
 
-			if (ComPortTable[i] > MaxComPort) {
-				continue;
+			if (ComPortTable[i] <= MaxComPort) {
+				desc = lst[cnt].desc;
+				WideCharToMultiByte(CP_UTF8, 0, ComPortDesc[i], -1,
+									desc, SERIAL_PORT_DESC_MAX, NULL, NULL);
+				sprintf(lst[cnt].path, "\\\\.\\COM%d", ComPortTable[i]);
+
+				cnt++;
 			}
-
-			desc = lst[cnt].desc;
-
-			WideCharToMultiByte(CP_UTF8, 0, ComPortDesc[i], -1,
-								desc, SERIAL_PORT_DESC_MAX, NULL, NULL);
-			sprintf(lst[cnt].path, "\\\\.\\COM%d", ComPortTable[i]);
-
-			cnt++;
-/*
-			if (CheckCOMFlag(ComPortTable[i]) == 1) {
-				continue;
-			}
-			_snprintf_s(EntName, sizeof(EntName), _TRUNCATE, "COM%d", 
-						ComPortTable[i]);
-
-			if (ComPortDesc[i] != NULL) {
-				strncat_s(EntName, sizeof(EntName), ": ", _TRUNCATE);
-				strncat_s(EntName, sizeof(EntName), ComPortDesc[i], _TRUNCATE);
-			}
-*/
+			
+			free(ComPortDesc[i]);
 		}
-	} else {
 	}
 
 	return cnt;

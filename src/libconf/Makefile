@@ -19,27 +19,16 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 # 
 
-include mk/config.mk
+ARCH = arm
 
-PROG = trdp_proxy
+LIB_STATIC = conf
+#LIB_SHARED = job_ctrl
 
-CFILES = chat.c match.c conf.c trdp_proxy.c trdp_conf.c
+CFILES = $(wildcard *.c)
 
-# Compile ANSI build only if CHARSET=ANSI
-ifeq (${CHARSET}, ANSI)
-  CFLAGS= -O3 -std=c99 -D _WIN32_IE=0x0500 -D WINVER=0x600
-else
-  CFLAGS= -O3 -std=c99 -D UNICODE -D _UNICODE -D _WIN32_IE=0x0500 -D WINVER=0x600
-endif
+INCPATH = ../include
 
-LDFLAGS = -s -Wl,--subsystem,windows
+LIBDEPS =
+DEPS = 
 
-LIBDIRS = win
-
-LIBS = pthread m win comctl32 gdi32 ws2_32 setupapi
-OBJS = win/resource.o
-
-INCPATH = . include 
-
-include mk/prog.mk
-
+include ../../scripts/lib.mk
